@@ -1,0 +1,145 @@
+   {
+        year: 918,
+        description: "Richard the Justiciar becomes the first Duke of Burgundy",
+        type: "political"
+    },
+    {
+        year: 962,
+        description: "Otto the Great is crowned Emperor of the Holy Roman Empire by the Pope",
+        type: "political"
+    },
+    {
+        year: 987,
+        description: "Hugh Capet becomes the first King of the Franks and founder of the French Capetian dynasty",
+        type: "political"
+    },
+    {
+        year: 1032,
+        description: "Duke Robert II the Pious, grandson of Hugh Capet and brother of Henry I of France, becomes the founder of the Burgundian Capetian dynasty",
+        type: "political"
+    },
+    {
+        year: 1049,
+        description: "Saint Hugh becomes Abbot of Cluny",
+        type: "religious"
+    },
+    {
+        year: 1050,
+        description: "Marriage of Matilda of Flanders and William the Conqueror",
+        type: "marriage"
+    },
+    {
+        year: 1066,
+        description: "Battle of Hastings, William the Conqueror becomes King of England",
+        type: "battle"
+    },
+    {
+        year: 1098,
+        description: "Foundation of Cîteaux Abbey",
+        type: "religious"
+    },
+    {
+        year: 1100,
+        description: "Otto II becomes the first Count of Habsburg",
+        type: "political"
+    },
+    {
+        year: 1152,
+        description: "Marriage of Henry II Plantagenet and Eleanor of Aquitaine, seeds of the Hundred Years' War",
+        type: "marriage"
+    },
+    {
+        year: 1153,
+        description: "Death of Bernard of Clairvaux",
+        type: "death"
+    },
+    {
+        year: 1214,
+        description: "Battle of Bouvines",
+        type: "battle"
+    },
+    {
+        year: 1215,
+        description: "Magna Carta (Great Charter of Freedoms)",
+        type: "political"
+    },
+    {
+        year: 1230,
+        description: "Construction of cloth halls in Ypres and belfry in Bruges (stone tower, 1280)",
+        type: "construction"
+    },
+    {
+        year: 1253,
+        description: "All documents in Ghent written in Diets language; other provinces of the Netherlands follow",
+        type: "cultural"
+    },
+    {
+        year: 1285,
+        description: "Establishment of Ter Beurze inn in Bruges",
+        type: "foundation"
+    },
+    {
+        year: 1300,
+        description: "Death of Jacob van Maerlant",
+        type: "death"
+    },
+    {
+        year: 1302,
+        description: "Battle of the Golden Spurs (Kortrijk)",
+        type: "battle"
+    },
+    {
+        year: 1309,
+        description: "Pope Clement V settles in Avignon",
+        type: "religious"
+    },
+    {
+        year: 1328,
+        description: "Philip VI, first king of the Valois dynasty, ascends to the French throne",
+        type: "political"
+    },
+    {
+        year: 1334,
+        description: "Flood, storm surge floods Zeeland islands of Walcheren and Wulpen",
+        type: "natural"
+    },
+    {
+        year: 1337,
+        description: "Official start of the Hundred Years' War",
+        type: "political"
+    },
+    {
+        year: 1338,
+        description: "Jacob van Artevelde becomes leader of Flanders",
+        type: "political"
+    },
+    {
+        year: 1346,
+        description: "Battle of Crécy",
+        type: "battle"
+    },
+    {
+        year: 1346,
+        description: "Louis II de Male becomes Count of Flanders",
+        type: "battle"
+    },
+    {
+        year: 1348,
+        description: "Beginning of the Black Death epidemic in Europe",
+        type: "natural"
+    },
+    {
+        year: 1356,
+        description: "Battle of Poitiers (Hundred Years' War)",
+        type: "battle"
+    },
+    {
+        year: 1357,
+        description: "Étienne Marcel (uprising in Paris)",
+        type: "political"
+    },
+    {
+        year: 1360,
+        description: "Treaty of Brétigny (ceasefire)",
+        type: "treaty"
+    },  
