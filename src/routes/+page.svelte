@@ -105,10 +105,10 @@
 	<div class="container mx-auto px-4">
 		<header class="mb-8 text-center">
 			<h1 class="mb-2 text-4xl font-bold text-gray-900">
-				Burgundian Territory Changes (1363-1477)
+				Duchy of Burgundy (1363-1477)
 			</h1>
 			<p class="mx-auto max-w-2xl text-lg text-gray-600">
-				Explore the territorial evolution of the Duchy of Burgundy through the medieval period
+				Explore the rise and territorial expansion of the Duchy of Burgundy under the Valois-Burgundian dynasty
 			</p>
 		</header>
 

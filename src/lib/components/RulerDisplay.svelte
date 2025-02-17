@@ -37,7 +37,6 @@
             <!-- Information -->
             <div class="space-y-2">
                 <p class="text-sm text-gray-600">{currentRuler.description}</p>
-
             </div>
             <!-- Coat of Arms -->
             <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden p-2">
@@ -49,64 +48,65 @@
             </div>
         </div>
 
-        <!-- Timeline -->
+        <!-- Combined Timeline -->
         <div class="p-4 border-t border-gray-100">
-            <div class="relative h-2 bg-gray-200 rounded-full">
-                {#each burgundianRulers as ruler}
-                    <div 
-                        class="absolute h-full rounded-full transition-all duration-300"
-                        class:bg-red-900={ruler === currentRuler}
-                        class:bg-gray-400={ruler !== currentRuler}
-                        style="left: {((ruler.reignStart - 1363) / (1477 - 1363)) * 100}%; 
-                               width: {((ruler.reignEnd - ruler.reignStart) / (1477 - 1363)) * 100}%;"
-                    >
-                        <div class="absolute -bottom-6 left-1/2 transform -translate-x-1/2">
+            <!-- Years Scale -->
+            <div class="flex justify-between text-xs text-gray-500 mb-4">
+   
+            </div>
+            
+            <!-- Main Timeline -->
+            <div class="relative">
+                <!-- Ruler Periods -->
+                <div class="relative h-6 bg-gray-200 rounded-full mb-6">
+                    {#each burgundianRulers as ruler}
+                        <div 
+                            class="absolute h-full transition-all duration-300 flex items-center justify-center border-l-2 border-r-2 border-white
+                                   {ruler === currentRuler ? 'bg-red-900' : 'bg-gray-400'}"
+                            style="left: {((ruler.reignStart - 1363) / (1477 - 1363)) * 100}%; 
+                                   width: {((ruler.reignEnd - ruler.reignStart) / (1477 - 1363)) * 100}%;"
+                        >
                             <img 
                                 src={ruler.coatOfArms} 
                                 alt="Coat of Arms"
-                                class="w-4 h-4 object-contain"
+                                class="h-4 w-4 object-contain"
                             />
                         </div>
-                    </div>
-                {/each}
+                    {/each}
+                </div>
+
+                <!-- Year Marker -->
                 <div 
-                    class="absolute w-2 h-2 bg-white border-2 border-red-900 rounded-full -top-1 transition-all duration-300"
-                    style="left: calc({((selectedYear - 1363) / (1477 - 1363)) * 100}% - 4px);"
-                ></div>
+                    class="absolute w-0.5 h-6 bg-red-900 top-0 transition-all duration-300"
+                    style="left: calc({((selectedYear - 1363) / (1477 - 1363)) * 100}%);"
+                >
+                    <div class="absolute -top-6 left-1/2 transform -translate-x-1/2 whitespace-nowrap">
+                        <span class="text-sm font-medium text-red-900 bg-white px-1 rounded shadow-sm border border-red-200">
+                            {selectedYear}
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Ruler Names and Years -->
+                <!-- Ruler Names and Years -->
+                <div class="flex text-xs mt-2 h-18">
+                    {#each burgundianRulers as ruler}
+                        <div 
+                            class="absolute text-center transition-opacity duration-300"
+                            class:text-red-900={ruler === currentRuler}
+                            class:text-gray-600={ruler !== currentRuler}
+                            style="left: {((ruler.reignStart - 1363) / (1477 - 1363)) * 100}%;
+                                   width: {((ruler.reignEnd - ruler.reignStart) / (1477 - 1363)) * 100}%;"
+                        >
+                            <div class="font-medium">{ruler.name}</div>
+                            <div class="text-xs opacity-75">{ruler.reignStart}-{ruler.reignEnd}</div>
+                        </div>
+                    {/each}
+                </div>
             </div>
         </div>
 
         <!-- Succession -->
-        <div class="p-4 bg-gray-50 border-t border-gray-100">
-            <h4 class="font-semibold text-sm text-gray-700 mb-2">Succession</h4>
-            <div class="grid grid-cols-2 gap-4 text-sm">
-                {#if previousRuler}
-                    <div class="flex items-center gap-2">
-                        <img 
-                            src={previousRuler.coatOfArms} 
-                            alt="Previous ruler's coat of arms"
-                            class="w-6 h-6 object-contain"
-                        />
-                        <div class="text-gray-600">
-                            <span class="block text-xs">Previous</span>
-                            {previousRuler.name}
-                        </div>
-                    </div>
-                {/if}
-                {#if nextRuler}
-                    <div class="flex items-center justify-end gap-2">
-                        <div class="text-gray-600 text-right">
-                            <span class="block text-xs">Next</span>
-                            {nextRuler.name}
-                        </div>
-                        <img 
-                            src={nextRuler.coatOfArms} 
-                            alt="Next ruler's coat of arms"
-                            class="w-6 h-6 object-contain"
-                        />
-                    </div>
-                {/if}
-            </div>
-        </div>
+
     </div>
 {/if}
