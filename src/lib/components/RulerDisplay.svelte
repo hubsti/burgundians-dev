@@ -170,7 +170,7 @@
         </div>
 
         <!-- Event Type Filter -->
-        <div class="p-4 border-t border-gray-100">
+        <div class="p-4 border-t border-gray-100 mt-5">
             <div class="flex flex-wrap gap-2">
                 <button
                     class="px-3 py-1 rounded-full text-sm transition-colors

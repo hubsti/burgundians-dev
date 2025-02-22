@@ -96,6 +96,19 @@
 		return eventTypeIcons[type] || '📅';
 	}
 
+	function groupTerritoriesByRuler(territories: Territory[]) {
+		return territories.reduce(
+			(acc, territory) => {
+				if (!acc[territory.ruler]) {
+					acc[territory.ruler] = [];
+				}
+				acc[territory.ruler].push(territory);
+				return acc;
+			},
+			{} as Record<string, Territory[]>
+		);
+	}
+
 	onDestroy(() => {
 		stopPlayback();
 	});
@@ -104,11 +117,10 @@
 <div class="min-h-screen bg-gray-50 py-8">
 	<div class="container mx-auto px-4">
 		<header class="mb-8 text-center">
-			<h1 class="mb-2 text-4xl font-bold text-gray-900">
-				Duchy of Burgundy (1363-1477)
-			</h1>
+			<h1 class="mb-2 text-4xl font-bold text-gray-900">Duchy of Burgundy (1363-1477)</h1>
 			<p class="mx-auto max-w-2xl text-lg text-gray-600">
-				Explore the rise and territorial expansion of the Duchy of Burgundy under the Valois-Burgundian dynasty
+				Explore the rise and territorial expansion of the Duchy of Burgundy under the
+				Valois-Burgundian dynasty
 			</p>
 		</header>
 
@@ -121,49 +133,92 @@
 
 				<!-- Current Territory Overview -->
 				<div class="rounded-xl bg-white p-6 shadow-lg">
-					<div class="mb-4 flex items-center justify-between">
-						<div>
-							<h2 class="text-xl font-semibold text-gray-900">
-								Current Territories ({currentTerritories.length})
-							</h2>
-							<p class="text-sm text-gray-600">Listed chronologically by acquisition date</p>
-						</div>
-						<div class="rounded-lg bg-red-900 px-4 py-2 text-white">
-							<span class="font-medium">{currentRuler}</span>
+					<!-- Header with Year and Ruler -->
+					<div class="mb-6 border-b border-gray-200 pb-4">
+						<div class="flex items-center justify-between">
+							<h2 class="text-xl font-semibold text-gray-900">Burgundian Territories</h2>
+							<div class="flex items-center gap-6">
+								<div class="text-center">
+									<div class="text-3xl font-bold text-gray-900">{selectedYear}</div>
+									<div class="text-sm text-gray-600">Current Year</div>
+								</div>
+								<div class="rounded-lg bg-red-900 px-6 py-3 text-center">
+									<div class="text-xl font-semibold text-white">{currentRuler}</div>
+									<div class="text-sm text-red-100">Duke of Burgundy</div>
+								</div>
+							</div>
 						</div>
 					</div>
-					<div class="grid grid-cols-1 gap-4 md:grid-cols-2 lg:grid-cols-3">
-						{#each currentTerritories as territory (territory.id)}
-							<div class="flex flex-col rounded-lg border border-gray-200 bg-gray-50 p-3">
-								<h3 class="font-medium text-gray-900">{territory.name}</h3>
-								<div class="mt-1 space-y-1">
-									<p class="text-sm text-gray-600">
-										<span class="inline-block rounded-md bg-red-100 px-2 py-1 text-red-900">
-											Acquired: {territory.acquisition}
-										</span>
-									</p>
-									{#if territory.properties?.capital}
-										<p class="text-sm text-gray-500">Capital: {territory.properties.capital}</p>
-									{/if}
+
+					<!-- Territory Groups -->
+					<div class="space-y-6">
+						{#each Object.entries(groupTerritoriesByRuler(currentTerritories)) as [ruler, territories]}
+							<div class="space-y-3">
+								<h3 class="font-medium text-gray-900">
+									Territories acquired by {ruler}
+								</h3>
+								<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+									{#each territories as territory}
+										<div
+											class="relative rounded-lg border border-gray-200 bg-white p-4 shadow-sm transition-shadow hover:shadow-md"
+										>
+											<!-- Territory Header -->
+											<div class="flex items-start gap-3">
+												{#if territory.coatOfArms}
+													<img
+														src={territory.coatOfArms}
+														alt="Coat of arms of {territory.name}"
+														class="h-10 w-10 object-contain"
+													/>
+												{/if}
+												<div class="flex-1">
+													<h4 class="font-medium text-gray-900">
+														{territory.name}
+													</h4>
+													<p class="text-sm text-gray-500">
+														{territory.properties?.capital || 'No capital specified'}
+													</p>
+												</div>
+												<div class="absolute top-2 right-2 rounded bg-gray-100 px-2 py-1 text-sm">
+													{territory.acquisition}
+												</div>
+											</div>
+
+											<!-- Acquisition Info -->
+											<div class="mt-3 text-sm">
+												{#if territory.properties?.acquisitionMethod}
+													<div class="rounded-md bg-gray-50 p-2 text-gray-700">
+														{territory.properties.acquisitionMethod}
+													</div>
+												{/if}
+											</div>
+
+											<!-- Previous Ruler -->
+											{#if territory.properties?.previousRuler}
+												<div class="mt-2 flex items-center gap-1 text-sm text-gray-600">
+													<span>From:</span>
+													<span class="font-medium">{territory.properties.previousRuler}</span>
+												</div>
+											{/if}
+										</div>
+									{/each}
 								</div>
 							</div>
 						{/each}
 					</div>
 				</div>
 			</div>
-
-
-            <div class="space-y-6">
-                <RulerDisplay
-                    {selectedYear}
-                    {isPlaying}
-                    {playbackSpeed}
-                    {currentEvents}
-                    on:yearChange={handleYearChange}
-                    on:playbackToggle={handlePlaybackToggle}
-                    on:speedChange={handleSpeedChange}
-                />
-            </div>
+			<div class="space-y-6">
+				<RulerDisplay
+					{selectedYear}
+					{isPlaying}
+					{playbackSpeed}
+					{currentEvents}
+					on:yearChange={handleYearChange}
+					on:playbackToggle={handlePlaybackToggle}
+					on:speedChange={handleSpeedChange}
+				/>
+			</div>
 		</div>
 	</div>
 </div>

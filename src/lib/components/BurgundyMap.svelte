@@ -10,6 +10,11 @@
         getTerritoryInfoByFeatureId,
         filterGeoJSONByYear
     } from '$lib/data/geojson-territory-boundaries';
+    import {
+        southernTerritoryMap,
+        getSouthernTerritoryInfo,
+        filterSouthernTerritoriesByYear
+    } from '$lib/data/southern-territory-boundaries';
     
     let L: typeof import('leaflet');
     
@@ -22,7 +27,10 @@
     let geojsonLayers: LayerGroup;
     let battleLayers: LayerGroup;
     let legendControl: any;
-    let geoJSONData: any = null;
+    let geoJSONData: any = {
+        northern: null,
+        southern: null
+    };
 
     onMount(async () => {
         if (browser) {
@@ -51,7 +59,7 @@
 
     function initializeMap(): void {
         map = L.map(mapElement, {
-            center: [49.5, 5.0], // Centered on Burgundian territories
+            center: [48.2, 5.0], // Adjusted center to include southern territories
             zoom: 6,
             minZoom: 5,
             maxZoom: 10,
@@ -69,18 +77,15 @@
     }
 
     function addMapControls(): void {
-        // Add zoom control
         L.control.zoom({
             position: 'topright'
         }).addTo(map);
 
-        // Add scale
         L.control.scale({
             imperial: false,
             position: 'bottomright'
         }).addTo(map);
 
-        // Add legend
         addLegend();
     }
 
@@ -128,7 +133,7 @@
         return `rgba(128, 0, 32, ${opacity})`;
     }
 
-    function createTerritoryPopup(territory: Territory): string {
+    function createTerritoryPopup(territory: any): string {
         return `
             <div class="px-4 py-3">
                 <h3 class="text-lg font-bold mb-2">${territory.name}</h3>
@@ -136,8 +141,8 @@
                     <p><strong>Acquired:</strong> ${territory.acquisition}</p>
                     <p><strong>Ruler:</strong> ${territory.ruler}</p>
                     <p><strong>Years under control:</strong> ${selectedYear - territory.acquisition}</p>
-                    ${territory.properties?.capital ? 
-                        `<p><strong>Capital:</strong> ${territory.properties.capital}</p>` : ''}
+                    ${territory.capital ? 
+                        `<p><strong>Capital:</strong> ${territory.capital}</p>` : ''}
                 </div>
             </div>
         `;
@@ -147,9 +152,14 @@
         if (!browser || !map || !L) return;
         
         try {
-            // Load GeoJSON data from your file location
-            const response = await fetch('/data/burgundy-territories.geojson');
-            geoJSONData = await response.json();
+            // Load both northern and southern GeoJSON data
+            const [northernResponse, southernResponse] = await Promise.all([
+                fetch('/data/burgundy-territories.geojson'),
+                fetch('/data/southern-territories.geojson')
+            ]);
+
+            geoJSONData.northern = await northernResponse.json();
+            geoJSONData.southern = await southernResponse.json();
             
             // Initial rendering of GeoJSON layers
             updateGeoJSONLayers();
@@ -159,39 +169,48 @@
     }
 
     function updateGeoJSONLayers(): void {
-        if (!browser || !map || !L || !geojsonLayers || !geoJSONData) return;
+        if (!browser || !map || !L || !geojsonLayers || !geoJSONData.northern || !geoJSONData.southern) return;
         
         geojsonLayers.clearLayers();
         
-        // Filter by year
-        const filteredGeoJSON = filterGeoJSONByYear(geoJSONData, selectedYear);
-        if (!filteredGeoJSON) return;
-        
-        // Create GeoJSON layer with styling and popups
-        const layer = L.geoJSON(filteredGeoJSON, {
-            style: (feature) => {
-                const territoryInfo = getTerritoryInfoByFeatureId(feature.id);
-                if (!territoryInfo) return {};
-                return getGeoJSONTerritoryStyle(territoryInfo.category);
-            },
-            onEachFeature: (feature, layer) => {
-                const territoryInfo = getTerritoryInfoByFeatureId(feature.id);
-                if (territoryInfo) {
-                    layer.bindPopup(`
-                        <div class="px-3 py-2">
-                            <h3 class="font-bold">${territoryInfo.name}</h3>
-                            <p>Acquired in ${territoryInfo.acquisition}</p>
-                            <p>Under ${territoryInfo.ruler}</p>
-                            ${territoryInfo.capital ? 
-                                `<p>Capital: ${territoryInfo.capital}</p>` : ''}
-                            <p>Years under control: ${selectedYear - territoryInfo.acquisition}</p>
-                        </div>
-                    `);
+        // Add northern territories
+        const filteredNorthern = filterGeoJSONByYear(geoJSONData.northern, selectedYear);
+        if (filteredNorthern) {
+            L.geoJSON(filteredNorthern as GeoJSON.FeatureCollection, {
+                style: (feature) => {
+                    if (!feature || !feature.id) return {};
+                    const territoryInfo = getTerritoryInfoByFeatureId(feature.id as string);
+                    if (!territoryInfo) return {};
+                    return getGeoJSONTerritoryStyle(territoryInfo.category);
+                },
+                onEachFeature: (feature, layer) => {
+                    const territoryInfo = feature.id ? getTerritoryInfoByFeatureId(feature.id.toString()) : null;
+                    if (territoryInfo) {
+                        layer.bindPopup(createTerritoryPopup(territoryInfo));
+                    }
                 }
-            }
-        });
+            }).addTo(geojsonLayers);
+        }
         
-        layer.addTo(geojsonLayers);
+        // Add southern territories
+        const filteredSouthern = filterSouthernTerritoriesByYear(geoJSONData.southern, selectedYear);
+        if (filteredSouthern) {
+            L.geoJSON(filteredSouthern as GeoJSON.FeatureCollection, {
+                style: (feature) => {
+                    const territoryInfo = feature && feature.id ? getSouthernTerritoryInfo(feature.id.toString()) : null;
+                    if (!territoryInfo) return {};
+                    return getGeoJSONTerritoryStyle(territoryInfo.category);
+                },
+                onEachFeature: (feature, layer) => {
+                    if (feature && feature.id) {
+                        const territoryInfo = getSouthernTerritoryInfo(feature.id.toString());
+                        if (territoryInfo) {
+                            layer.bindPopup(createTerritoryPopup(territoryInfo));
+                        }
+                    }
+                }
+            }).addTo(geojsonLayers);
+        }
     }
 
     function updateTerritories(): void {
@@ -204,7 +223,7 @@
         // Add territory center markers (smaller, since we now have GeoJSON boundaries)
         currentTerritories.forEach(territory => {
             const marker = L.circleMarker(territory.coordinates, {
-                radius: 4, // Smaller since we have boundaries now
+                radius: 4,
                 color: '#000',
                 weight: 1,
                 opacity: 0.7,

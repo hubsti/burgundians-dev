@@ -216,7 +216,7 @@ export const territoryColorMap = {
 };
 
 // Helper function to get styling for GeoJSON territories
-export function getGeoJSONTerritoryStyle(category: string) {
+export function getGeoJSONTerritoryStyle(category: keyof typeof territoryColorMap) {
     const color = territoryColorMap[category] || "#808080";
     return {
         color: "#555",
@@ -238,7 +238,7 @@ export function filterGeoJSONByYear(geoJSON: any, selectedYear: number) {
     if (!geoJSON || !geoJSON.features) return null;
 
     // Create a new GeoJSON object with filtered features
-    const filteredFeatures = geoJSON.features.filter(feature => {
+    const filteredFeatures = geoJSON.features.filter((feature: { id: string; }) => {
         const territoryInfo = getTerritoryInfoByFeatureId(feature.id);
         return territoryInfo && territoryInfo.acquisition <= selectedYear;
     });

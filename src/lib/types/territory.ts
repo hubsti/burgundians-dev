@@ -8,12 +8,14 @@ export interface Territory {
     acquisition: number;
     coordinates: [number, number]; // [latitude, longitude]
     ruler: string;
+    coatOfArms?: string;  
     boundaries?: GeoJSON.Polygon | GeoJSON.MultiPolygon;
     properties?: {
         capital?: string;
         population?: number;
         language?: string;
         previousRuler?: string;
+        acquisitionMethod?: string;
         category?: string;
     };
 }

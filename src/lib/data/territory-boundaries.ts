@@ -245,7 +245,7 @@ export const territoryColorMap = {
 };
 
 // Helper function to get styling for territories
-export function getTerritoryStyle(category: string) {
+export function getTerritoryStyle(category: keyof typeof territoryColorMap) {
     const color = territoryColorMap[category] || "#808080";
     return {
         color: "#555",

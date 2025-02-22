@@ -2,7 +2,7 @@
 import type { Territory } from '../types/territory';
 
 // GeoJSON ID to region mapping based on analysis of geographical coordinates
-export const geoJSONRegionMap = {
+export const geoJSONRegionMap: { [key: string]: string } = {
     // Flanders region (Northern Belgium)
     "339ebf897d68cef6f0352a517466781a": "flanders",
     "9727158d1b6ad55e608cadb45db45cc4": "western-flanders",
@@ -47,7 +47,15 @@ export const geoJSONRegionMap = {
 };
 
 // Maps regions to their historical acquisition data
-export const regionAcquisitionData = {
+type RegionAcquisitionData = {
+    [key: string]: {
+        year: number;
+        ruler: string;
+        category: string;
+    };
+};
+
+export const regionAcquisitionData: RegionAcquisitionData = {
     // Core territories - Apanage of Philip the Bold
     "northern-burgundy": { year: 1363, ruler: "Philip the Bold", category: "apanage" },
 
@@ -82,7 +90,7 @@ export const regionAcquisitionData = {
 };
 
 // Readable names for GeoJSON regions
-export const regionDisplayNames = {
+export const regionDisplayNames: { [key: string]: string } = {
     "flanders": "County of Flanders",
     "western-flanders": "Western Flanders",
     "brabant": "Duchy of Brabant",
@@ -110,7 +118,7 @@ export const regionDisplayNames = {
 };
 
 // Get style for a territory based on its category
-export function getGeoJSONTerritoryStyle(category: string) {
+export function getGeoJSONTerritoryStyle(category: 'apanage' | 'philippe-le-hardi' | 'philippe-le-bon' | 'charles-le-temeraire') {
     const colorMap = {
         "apanage": "#8B4513",          // Dark brown - Apanage of Philip the Bold
         "philippe-le-hardi": "#CD853F", // Light brown - Possessions of Philip the Bold
@@ -132,8 +140,8 @@ export function getGeoJSONTerritoryStyle(category: string) {
 export function filterGeoJSONByYear(geoJSON: any, selectedYear: number) {
     if (!geoJSON || !geoJSON.features) return { type: "FeatureCollection", features: [] };
 
-    const filteredFeatures = geoJSON.features.filter(feature => {
-        const regionId = geoJSONRegionMap[feature.id];
+    const filteredFeatures = geoJSON.features.filter((feature: { id: string | number; }) => {
+        const regionId = geoJSONRegionMap[feature.id as string];
         const regionData = regionAcquisitionData[regionId];
 
         return regionData && regionData.year <= selectedYear;
