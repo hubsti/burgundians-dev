@@ -152,22 +152,18 @@
 				</div>
 			</div>
 
-			<div class="space-y-6">
-				<RulerDisplay {selectedYear} />
-				<!-- Timeline Control with integrated events -->
-				<div class="rounded-xl bg-white shadow-lg">
-					<Timeline
-						{selectedYear}
-						{isPlaying}
-						{playbackSpeed}
-						territories={burgundianTerritories}
-						{currentEvents}
-						on:yearChange={handleYearChange}
-						on:playbackToggle={handlePlaybackToggle}
-						on:speedChange={handleSpeedChange}
-					/>
-				</div>
-			</div>
+
+            <div class="space-y-6">
+                <RulerDisplay
+                    {selectedYear}
+                    {isPlaying}
+                    {playbackSpeed}
+                    {currentEvents}
+                    on:yearChange={handleYearChange}
+                    on:playbackToggle={handlePlaybackToggle}
+                    on:speedChange={handleSpeedChange}
+                />
+            </div>
 		</div>
 	</div>
 </div>

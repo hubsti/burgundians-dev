@@ -14,14 +14,15 @@ export interface Territory {
         population?: number;
         language?: string;
         previousRuler?: string;
+        category?: string;
     };
 }
 
 export interface TimelineEvent {
     year: number;
     description: string;
+    type?: string;
     territories?: string[]; // Reference to territory IDs
-    type?: 'acquisition' | 'loss' | 'battle' | 'treaty' | 'political' | 'cultural';
     location?: [number, number]; // [latitude, longitude]
 }
 
