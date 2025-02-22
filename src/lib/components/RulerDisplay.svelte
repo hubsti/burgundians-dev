@@ -4,6 +4,7 @@
     import { eventTypeColors, eventTypeIcons } from '$lib/data/events';
     import type { Ruler } from '$lib/data/rulers';
     import type { HistoricalEvent } from '$lib/data/events';
+    import { fly } from 'svelte/transition';
 
     export let selectedYear: number;
     export let isPlaying: boolean = false;
@@ -23,15 +24,6 @@
         ruler => selectedYear >= ruler.reignStart && selectedYear <= ruler.reignEnd
     );
 
-    $: nextRuler = burgundianRulers.find(
-        ruler => ruler.reignStart > selectedYear
-    );
-
-    $: previousRuler = [...burgundianRulers]
-        .reverse()
-        .find(ruler => ruler.reignEnd < selectedYear);
-
-    $: currentYearEvents = currentEvents.filter(e => e.year === selectedYear);
     $: filteredEvents = selectedEventType === 'all' 
         ? currentEvents 
         : currentEvents.filter(e => e.type === selectedEventType);
@@ -56,6 +48,61 @@
     function getEventTypeIcon(type: keyof typeof eventTypeIcons): string {
         return eventTypeIcons[type] || '📅';
     }
+
+    // Helper function to get event-specific image
+    function getEventImage(event: HistoricalEvent): string | null {
+        const eventKey = event.description
+            .toLowerCase()
+            .replace(/[^a-z0-9]+/g, '-')
+            .replace(/(^-|-$)/g, '');
+        
+        return `/events/${event.year}-${eventKey}.jpg`;
+    }
+
+    // Helper function to identify significant events
+    function isSignificantEvent(event: HistoricalEvent): boolean {
+        const significantTypes = ['acquisition', 'battle', 'political', 'treaty'];
+        const significantKeywords = [
+            'succession', 
+            'marriage', 
+            'death', 
+            'became duke',
+            'acquired',
+            'battle',
+            'siege',
+            'treaty'
+        ];
+        
+        return significantTypes.includes(event.type) ||
+               significantKeywords.some(keyword => 
+                   event.description.toLowerCase().includes(keyword));
+    }
+
+    // Helper function to provide impact context for significant events
+    function getEventImpact(event: HistoricalEvent): string {
+        const impactMap: Record<string, string> = {
+            "Transfer of Burgundy to Philip the Bold": 
+                "Founded the Burgundian branch of House of Valois",
+            "County of Namur acquired by Burgundians":
+                "Strengthened Burgundian control in the Low Countries",
+            "Luxembourg comes under Burgundian control":
+                "Extended Burgundian influence eastward",
+            "Charles the Bold acquires the Duchy of Guelders":
+                "Further expanded Burgundian territory in the Low Countries",
+            "Battle of Nancy":
+                "Led to the end of Burgundian independence",
+            "Death of Charles the Bold":
+                "Marked the end of the independent Duchy of Burgundy",
+            "Marriage of Philip the Bold to Margaret III of Flanders":
+                "Set the stage for Burgundian expansion into the Low Countries",
+            "Death of Philip the Bold and succession of John the Fearless":
+                "Marked the beginning of a more aggressive Burgundian policy",
+            "Assassination of John the Fearless, Philip the Good takes power":
+                "Led to closer alliance with England and expansion in the Low Countries"
+        };
+
+        return impactMap[event.description];
+    }
 </script>
 
 {#if currentRuler}
@@ -71,17 +118,14 @@
             <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden">
                 <img src={currentRuler.image} alt={currentRuler.name} class="w-full h-full object-cover"/>
             </div>
-            <div class="space-y-2">
+            <div class="col-span-2">
                 <p class="text-sm text-gray-600">{currentRuler.description}</p>
-            </div>
-            <div class="aspect-square bg-gray-100 rounded-lg overflow-hidden p-2">
-                <img src={currentRuler.coatOfArms} alt="Coat of Arms" class="w-full h-full object-contain"/>
             </div>
         </div>
 
         <!-- Playback Controls -->
         <div class="px-4 py-3 border-t border-gray-100 bg-gray-50">
-            <div class="flex items-center justify-between mb-3">
+            <div class="flex items-center justify-between">
                 <button
                     class="px-4 py-2 bg-red-900 text-white rounded-lg hover:bg-red-800 
                            focus:outline-none focus:ring-2 focus:ring-red-900 focus:ring-opacity-50 
@@ -119,9 +163,7 @@
 
         <!-- Timeline -->
         <div class="p-4 border-t border-gray-100">
-            <!-- Main Timeline -->
             <div class="relative">
-                <!-- Timeline Slider -->
                 <input
                     type="range"
                     min={1363}
@@ -149,28 +191,11 @@
                         </div>
                     {/each}
                 </div>
-
-        
-                <!-- Ruler Names - Properly centered under each period -->
-                <div class="relative mt-8 h-12">
-                    {#each burgundianRulers as ruler}
-                        <div 
-                            class="absolute text-center transition-colors duration-300"
-                            class:text-red-900={ruler === currentRuler}
-                            class:text-gray-600={ruler !== currentRuler}
-                            style="left: {((ruler.reignStart - 1363 + (ruler.reignEnd - ruler.reignStart)/2) / (1477 - 1363)) * 100}%;
-                                   transform: translateX(-50%);"
-                        >
-                            <div class="font-medium text-xs">{ruler.name}</div>
-                            <div class="text-xs opacity-75">{ruler.reignStart}-{ruler.reignEnd}</div>
-                        </div>
-                    {/each}
-                </div>
             </div>
         </div>
 
         <!-- Event Type Filter -->
-        <div class="p-4 border-t border-gray-100 mt-5">
+        <div class="p-4 border-t border-gray-100">
             <div class="flex flex-wrap gap-2">
                 <button
                     class="px-3 py-1 rounded-full text-sm transition-colors
@@ -192,41 +217,50 @@
             </div>
         </div>
 
-        <!-- Events List -->
+        <!-- Historical Timeline -->
         <div class="border-t border-gray-100">
-            <!-- Current Year Events -->
-            {#if currentYearEvents.length > 0}
-                <div class="p-4 border-b border-gray-100">
-                    <h3 class="text-lg font-semibold text-gray-900 mb-3">Events in {selectedYear}</h3>
-                    <div class="space-y-3">
-                        {#each currentYearEvents as event}
-                            <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                                <div class="flex items-center gap-2 mb-1">
-                                    <span class="px-2 py-1 text-xs rounded-full {getEventTypeColor(event.type)} text-white">
-                                        {getEventTypeIcon(event.type)} {event.type}
-                                    </span>
-                                </div>
-                                <p class="text-sm text-gray-700">{event.description}</p>
-                            </div>
-                        {/each}
-                    </div>
-                </div>
-            {/if}
-
-            <!-- Historical Events -->
             <div class="p-4">
                 <h3 class="text-lg font-semibold text-gray-900 mb-3">Historical Timeline</h3>
-                <div class="max-h-[300px] overflow-y-auto space-y-2 pr-2 
+                <div class="max-h-[500px] overflow-y-auto space-y-4 pr-2 
                            scrollbar-thin scrollbar-thumb-red-900 scrollbar-track-gray-100">
-                    {#each filteredEvents.slice().reverse() as event}
-                        <div class="p-3 bg-gray-50 rounded-lg border border-gray-200">
-                            <div class="flex items-center gap-2 mb-1">
-                                <span class="text-sm font-semibold text-gray-900">{event.year}</span>
-                                <span class="px-2 py-0.5 text-xs rounded-full {getEventTypeColor(event.type)} text-white">
-                                    {getEventTypeIcon(event.type)} {event.type}
-                                </span>
+                    {#each filteredEvents.slice().reverse() as event (event.year + event.description)}
+                        <div 
+                            class="rounded-lg border border-gray-100 bg-white shadow-sm overflow-hidden transition-all duration-300 transform"
+                            in:fly={{ y: 20, duration: 400 }}
+                            out:fly={{ y: -20, duration: 300 }}
+                        >
+                            <!-- Event Header -->
+                            <div class="flex items-center justify-between p-3 bg-gray-50 border-b border-gray-100">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-xl font-semibold text-red-900">{event.year}</span>
+                                    <span class="px-2 py-1 text-xs rounded-full {getEventTypeColor(event.type)} text-white 
+                                               flex items-center gap-1">
+                                        {getEventTypeIcon(event.type)}
+                                        {event.type}
+                                    </span>
+                                </div>
                             </div>
-                            <p class="text-sm text-gray-700">{event.description}</p>
+
+                            <!-- Event Content -->
+                            <div class="flex gap-4 p-3">
+                                <div class="flex-grow">
+                                    <p class="text-sm text-gray-700">{event.description}</p>
+                                    {#if isSignificantEvent(event) && getEventImpact(event)}
+                                        <div class="mt-2 p-2 bg-red-50 rounded-md text-sm text-red-800">
+                                            <strong>Impact:</strong> {getEventImpact(event)}
+                                        </div>
+                                    {/if}
+                                </div>
+                                {#if getEventImage(event)}
+                                    <div class="w-32 h-24 flex-shrink-0">
+                                        <img 
+                                            src={getEventImage(event)}
+                                            alt={event.description}
+                                            class="w-full h-full object-cover rounded-md"
+                                        />
+                                    </div>
+                                {/if}
+                            </div>
                         </div>
                     {/each}
                 </div>
@@ -234,3 +268,4 @@
         </div>
     </div>
 {/if}
+

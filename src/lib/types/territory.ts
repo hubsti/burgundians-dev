@@ -3,6 +3,7 @@
 import type { GeoJSON } from 'geojson';
 
 export interface Territory {
+	showDetails: any;
     id: string;
     name: string;
     acquisition: number;
